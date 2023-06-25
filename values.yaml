@@ -45,6 +45,8 @@ concurrencyPolicy: Forbid
 # Enable a role, rolebinding, and service account be attached to the job for pod/exec capability
 createPodExecServiceAccount: false
 
+dnsConfig: {}
+
 # This is the script to be run when the job launches
 cronjobScript: |+
   #!/bin/sh

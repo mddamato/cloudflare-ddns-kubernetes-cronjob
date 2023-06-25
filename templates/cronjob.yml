@@ -16,12 +16,16 @@ spec:
     spec:
       template:
         spec:
+          {{- with .Values.dnsConfig }}
+          dnsConfig:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           containers:
           - name: {{ .Release.Name }}
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             command:
-            - /bin/bash
+            - /bin/sh
             - -c
             - mkdir -p /home/siluser/entrypoint && cp /scripts/cronjob-entrypoint.sh /home/siluser/entrypoint/cronjob-entrypoint.sh && chmod +x /home/siluser/entrypoint/cronjob-entrypoint.sh && echo "Starting script.." && cd /home/siluser/entrypoint && ./cronjob-entrypoint.sh && echo "Done with job."
             volumeMounts:
