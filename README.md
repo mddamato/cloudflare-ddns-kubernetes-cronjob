@@ -1,10 +1,8 @@
-# Pod-Cron-Job
+# cloudflare-ddns-kubernetes-cronjob
 
 ## Overview
 
-This chart is for deploying a cronjob in a namespace to perform periodic functions.
-
-In addition to running a simple script input from the Values file it also includes the necessary service account setup to perform remote functions in other pods in the same namespace.
+Cronjob that checks records in cloudflare against public IP and updates if required 
 
 Reference <https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/> for more information on k8s cronjobs.
 
