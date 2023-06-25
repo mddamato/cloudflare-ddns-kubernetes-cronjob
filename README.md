@@ -17,7 +17,7 @@ helm install cloudflare-ddns https://github.com/mddamato/cloudflare-ddns-kuberne
 
 from working directory
 ```
-rm -f cloudflare-ddns-kubernetes-cronjob-*.tgz
+rm -f cloudflare-ddns-kubernetes-cronjob*.tgz
 helm package .
 cp cloudflare-ddns-kubernetes-cronjob-*.tgz cloudflare-ddns-kubernetes-cronjob.tgz
 ```
