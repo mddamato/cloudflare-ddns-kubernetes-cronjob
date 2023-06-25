@@ -1,0 +1,91 @@
+# Set any number of environment variables for runtime information
+setEnvironmentVars: true
+environment:
+- name: ZONE_ID
+  value: "xxxxcbfcb732xxxxxxxxxxxxxxxxxxxx"
+# Space delimited Record IDs you want to monitor
+# IDs can be found by running curl command:
+# curl -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+#   -H "Authorization: Bearer $AUTH_KEY" \
+#   -H "Content-Type: application/json"
+- name: RECORD_IDS
+  value: "5d3xxxxxxxxxxxxxxxxxxxx56ed75fe4 b86210571b5dxxxxxxxxxxxxxxxxxxxx e604xxxxxxxxxxxxxxxxxxxx9e40ed99"
+# the record names that correspond to the IDs above, must be in the same order
+- name: NAMES
+  value: "name1.example.com example.com name2.example.com"
+# the proxied setting in cloudflare that corespond to the above records, must be in same order as names and IDs above
+- name: PROXIED_SETTING
+  value: "true true false"
+# auth key to access cloudflare. information around can be found https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
+- name: AUTH_KEY
+  value: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+
+# Image for the Cronjob to use.
+image:
+  repository: alpine
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Policy for restarting jobs
+restartPolicy: OnFailure
+
+# Cron reference: https://en.wikipedia.org/wiki/Cron 
+# Expression gen: https://crontab.guru/
+# Times are in UTC
+cronExpression: "0 * * * *"
+
+# How many jobs to keep in history
+successfulJobsHistoryLimit: 2
+failedJobsHistoryLimit: 2
+
+# Parallel jobs
+concurrencyPolicy: Forbid
+
+# Enable a role, rolebinding, and service account be attached to the job for pod/exec capability
+createPodExecServiceAccount: true
+
+# This is the script to be run when the job launches
+cronjobScript: |+
+  #!/bin/sh
+
+  set -e
+
+  apk add jq curl
+
+  index=0
+  names_array=($NAMES)
+  proxied_array=($PROXIED_SETTING)
+
+  for record in $RECORD_IDS ; do
+
+    export CF_IP=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$record" \
+    -H "Authorization: Bearer $AUTH_KEY" \
+    -H "Content-Type: application/json" | jq '.result.content' | tr -d '"')
+    
+    export ACTUAL_IP=$(curl -s icanhazip.com)
+
+    if [ "$CF_IP" == "$ACTUAL_IP" ]; then
+        echo $(date +"%y-%m-%d-%H-%M-%S") Record ID: $record
+        echo $(date +"%y-%m-%d-%H-%M-%S") CloudFlare Record IP: $CF_IP
+        echo $(date +"%y-%m-%d-%H-%M-%S") Actual IP: $ACTUAL_IP
+        echo $(date +"%y-%m-%d-%H-%M-%S") Record Name: ${names_array[$index]}
+        echo $(date +"%y-%m-%d-%H-%M-%S") Proxied Setting: ${proxied_array[$index]}
+        echo $(date +"%y-%m-%d-%H-%M-%S") IPs are equal, no change required
+    else
+        echo $(date +"%y-%m-%d-%H-%M-%S") Record ID: $record
+        echo $(date +"%y-%m-%d-%H-%M-%S") CloudFlare Record IP: $CF_IP
+        echo $(date +"%y-%m-%d-%H-%M-%S") Actual IP: $ACTUAL_IP
+        echo $(date +"%y-%m-%d-%H-%M-%S") Record Name: ${names_array[$index]}
+        echo $(date +"%y-%m-%d-%H-%M-%S") Proxied Setting: ${proxied_array[$index]}
+        echo $(date +"%y-%m-%d-%H-%M-%S") IPs are NOT equal, making change to CF
+
+        curl -X PUT "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$record" \
+        -H "Authorization: Bearer $AUTH_KEY" \
+        -H "Content-Type: application/json" \
+        --data "{\"type\":\"A\",\"name\":\"${names_array[$index]}\",\"content\":\"$ACTUAL_IP\",\"proxied\":${proxied_array[$index]}}"
+    fi
+
+  index=$((index + 1))
+  done
+  echo "Done with scipt";

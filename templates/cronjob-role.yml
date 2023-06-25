@@ -1,0 +1,22 @@
+{{- if .Values.createPodExecServiceAccount -}}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-pod-list-exec
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - "get"
+  - "list"
+- apiGroups:
+  - ""
+  resources:
+  - "pods/exec"
+  verbs:
+  - "create"
+  - "get"
+{{- end -}}

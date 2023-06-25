@@ -1,0 +1,10 @@
+- Cronjob Created
+
+Script:
+{{ .Values.cronjobScript }}
+
+Job Name:
+{{ .Release.Name }}
+
+Cron:
+{{ .Values.cronExpression }}

@@ -1,0 +1,44 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    tier: jobs
+spec:
+  schedule: "{{ .Values.cronExpression }}"
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: {{.Values.successfulJobsHistoryLimit}}
+  failedJobsHistoryLimit: {{.Values.failedJobsHistoryLimit}}
+  concurrencyPolicy: {{.Values.concurrencyPolicy}}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Release.Name }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+            - /bin/bash
+            - -c
+            - mkdir -p /home/siluser/entrypoint && cp /scripts/cronjob-entrypoint.sh /home/siluser/entrypoint/cronjob-entrypoint.sh && chmod +x /home/siluser/entrypoint/cronjob-entrypoint.sh && echo "Starting script.." && cd /home/siluser/entrypoint && ./cronjob-entrypoint.sh && echo "Done with job."
+            volumeMounts:
+            - name: {{ .Release.Name }}-script
+              mountPath: /scripts/cronjob-entrypoint.sh
+              subPath: cronjob-entrypoint.sh
+            {{ if .Values.setEnvironmentVars }}
+            {{- with .Values.environment }}
+            env:
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{ end }}
+          {{ if .Values.createPodExecServiceAccount }}
+          serviceAccountName: {{ .Release.Name }}-sa
+          {{ end }}
+          restartPolicy: {{ .Values.restartPolicy }}
+          volumes:
+          - name: {{ .Release.Name }}-script
+            configMap:
+              name: {{ .Release.Name }}-script
