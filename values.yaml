@@ -65,7 +65,7 @@ cronjobScript: |+
     -H "Authorization: Bearer $AUTH_KEY" \
     -H "Content-Type: application/json" | jq '.result.content' | tr -d '"')
     
-    export ACTUAL_IP=$(curl -s icanhazip.com)
+    export ACTUAL_IP=$(curl -s icanhazip.com.)
 
     if [ "$CF_IP" == "$ACTUAL_IP" ]; then
         echo $(date +"%y-%m-%d-%H-%M-%S") Record ID: $record
