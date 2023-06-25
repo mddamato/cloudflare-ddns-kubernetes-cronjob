@@ -1,6 +1,7 @@
 # Set any number of environment variables for runtime information
 setEnvironmentVars: true
 environment:
+# ZONE_ID can be found on the Overview section of your cloudflare account
 - name: ZONE_ID
   value: "xxxxcbfcb732xxxxxxxxxxxxxxxxxxxx"
 # Space delimited Record IDs you want to monitor
@@ -13,7 +14,7 @@ environment:
 # the record names that correspond to the IDs above, must be in the same order
 - name: NAMES
   value: "name1.example.com example.com name2.example.com"
-# the proxied setting in cloudflare that corespond to the above records, must be in same order as names and IDs above
+# the "proxied" setting in cloudflare that corresponds to the above records, must be in same order as names and IDs above
 - name: PROXIED_SETTING
   value: "true true false"
 # auth key to access cloudflare. information around can be found https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
