@@ -49,7 +49,7 @@ dnsConfig: {}
 
 # This is the script to be run when the job launches
 cronjobScript: |+
-  #!/bin/sh
+  #!/bin/bash
 
   set -e
 

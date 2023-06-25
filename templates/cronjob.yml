@@ -27,7 +27,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - mkdir -p /home/siluser/entrypoint && cp /scripts/cronjob-entrypoint.sh /home/siluser/entrypoint/cronjob-entrypoint.sh && chmod +x /home/siluser/entrypoint/cronjob-entrypoint.sh && echo "Starting script.." && cd /home/siluser/entrypoint && ./cronjob-entrypoint.sh && echo "Done with job."
+            - apk add bash && mkdir -p /home/siluser/entrypoint && cp /scripts/cronjob-entrypoint.sh /home/siluser/entrypoint/cronjob-entrypoint.sh && chmod +x /home/siluser/entrypoint/cronjob-entrypoint.sh && echo "Starting script.." && cd /home/siluser/entrypoint && bash ./cronjob-entrypoint.sh && echo "Done with job."
             volumeMounts:
             - name: {{ .Release.Name }}-script
               mountPath: /scripts/cronjob-entrypoint.sh
